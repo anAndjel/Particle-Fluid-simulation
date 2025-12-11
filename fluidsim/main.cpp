@@ -2,16 +2,16 @@
 #include <Windows.h>
 #endif
 
+#include <GLFW/glfw3.h>
 #include "imgui.h"
 #include "implot.h"
-#include <GLFW/glfw3.h>
 
+#include <cmath>
+#include <iostream>
+#include <stdio.h>
+#include <vector>
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
-#include <stdio.h>
-#include <iostream>
-#include <vector>
-#include <cmath>
 
 #define GL_SILENCE_DEPRECATION
 using namespace std;
@@ -24,11 +24,8 @@ using namespace std;
 #define TRACING_COLOR_RENDER 0x227733
 #define NUM_ELEM(array) (sizeof(array) / sizeof((array)[0]))
 static uint32_t rrggbb_to_aabbggrr(uint32_t u24_tracing_color) {
-    return
-        0xff << 24
-        | (u24_tracing_color & 0xff0000) >> 16
-        | (u24_tracing_color & 0xff00)
-        | (u24_tracing_color & 0xff) << 16;
+    return 0xff << 24 | (u24_tracing_color & 0xff0000) >> 16 | (u24_tracing_color & 0xff00) |
+        (u24_tracing_color & 0xff) << 16;
 }
 
 GLFWwindow* window;
@@ -70,8 +67,7 @@ public:
 std::vector<Particle> particles;
 
 // Print GLFW errors to console
-static void glfw_error_callback(int error, const char* description)
-{
+static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
@@ -84,12 +80,11 @@ void drawParticle() {
     for (auto& p : particles) {
         float nx = p.x / WIDTH * 2 - 1;
         float ny = p.y / HEIGHT * 2 - 1;
-        
+
         glVertex2f(nx, ny);
         glColor3f(p.r, p.g, p.b);
     }
     glEnd();
-
 }
 
 void updateParticle(float dt) {
@@ -98,7 +93,7 @@ void updateParticle(float dt) {
         p.y += p.vy * dt;
         p.x += p.vx * dt;
     }
-    
+
     glfwGetCursorPos(window, &GLFWmX, &GLFWmY);
 
     ParticlemX = GLFWmX;
@@ -136,13 +131,13 @@ void CollisionHandler(float dt) {
             float dx = a.x - b.x;
             float dy = a.y - b.y;
             auto distance = sqrt(((dx) * (dx)) + ((dy) * (dy)));
-            
+
             if (distance < radius * 2) {
                 float separationForce = 1000.0f;
-                //a.vx -= separationForce * dt;
-                //a.vy -= separationForce * dt;
-                //b.vx += separationForce * dt;
-                //b.vy += separationForce * dt;
+                // a.vx -= separationForce * dt;
+                // a.vy -= separationForce * dt;
+                // b.vx += separationForce * dt;
+                // b.vy += separationForce * dt;
 
                 a.vx += dx * separationForce * dt;
                 a.vy += dy * separationForce * dt;
@@ -175,7 +170,7 @@ void CollisionHandler(float dt) {
         }
 
         // collisions between particles
-        //for (auto& b : particles) {
+        // for (auto& b : particles) {
         //    auto distance = sqrt(((a.x - b.x) * (a.x - b.x)) + ((a.y - b.y) * (a.y - b.y)));
         //}
     }
@@ -183,16 +178,17 @@ void CollisionHandler(float dt) {
 
 void particleCreation() {
     for (int i = 0; i < 1; i++) {
-        particles.push_back(Particle{ startingX, startingY - 10, startingVX, -100, 1, 0, 0});
-        //startingX += 5;
-        //startingVX++;
-        //startingVY++;
+        particles.push_back(Particle{startingX, startingY - 10, startingVX, -100, 1, 0, 0});
+        // startingX += 5;
+        // startingVX++;
+        // startingVY++;
     }
     startingX = 5;
     startingY -= 10;
     for (int n = 0; n < 2500; n++) {
-        particles.push_back(Particle{ startingX, startingY, startingVX, startingVY, startingColorR, startingColorG, startingColorB});
-        //startingX += 5;
+        particles.push_back(
+            Particle{startingX, startingY, startingVX, startingVY, startingColorR, startingColorG, startingColorB});
+        // startingX += 5;
         startingX += 5;
         startingVX++;
         startingVY++;
@@ -231,14 +227,14 @@ void ImguiWindow() {
     static float f = 0.0f;
     static int counter = 0;
 
-    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+    ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    //ImGui::Checkbox("Demo Window", &);      // Edit bools storing our window open/close state
-    //ImGui::Checkbox("Another Window", &show_another_window);
+    ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
+    // ImGui::Checkbox("Demo Window", &);      // Edit bools storing our window open/close state
+    // ImGui::Checkbox("Another Window", &show_another_window);
 
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-    //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
+    // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
     auto size = ImVec2(ImGui::GetWindowSize().x - 20, 200 * 1.0);
     if (ImPlot::BeginPlot("Timing", size, ImPlotFlags_NoInputs)) {
@@ -248,14 +244,15 @@ void ImguiWindow() {
         };
         static ImPlotColormap timing_color_map = -1;
         if (timing_color_map == -1) {
-            timing_color_map = ImPlot::AddColormap("CycleTimesUpdateTimeColorMap", color_map_data, NUM_ELEM(color_map_data));
+            timing_color_map =
+                ImPlot::AddColormap("CycleTimesUpdateTimeColorMap", color_map_data, NUM_ELEM(color_map_data));
         }
 
         ImPlot::PushColormap(timing_color_map);
 
         ImPlot::SetupAxes("sample", "time (ms)");
-        //ImPlot::PlotLine("map_update", map_update_x, map_update_y, total_samples, 0, 0);
-        //ImPlot::PlotLine("render", render_x, render_y, total_samples, 0, 0);
+        // ImPlot::PlotLine("map_update", map_update_x, map_update_y, total_samples, 0, 0);
+        // ImPlot::PlotLine("render", render_x, render_y, total_samples, 0, 0);
 
         ImPlot::PopColormap();
 
@@ -263,13 +260,18 @@ void ImguiWindow() {
     }
 
 
+<<<<<<< HEAD
     if (ImGui::Button("reset")) {
         resetSimButton = true;
     }
+=======
+    ImGui::Button(
+        "resetSimButton"); // Buttons return true when clicked (most widgets return true when edited/activated)
+>>>>>>> 9a5f157 (make the window appear on macos)
     ImGui::SameLine();
     ImGui::Text("counter = %d", counter);
 
-    //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    // ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 }
 
@@ -285,7 +287,7 @@ void reset() {
     startingColorR = 0.31;
     startingColorG = 0.62;
     startingColorB = 0.62;
-    
+
     while (!particles.empty()) {
         particles.pop_back();
     }
@@ -344,20 +346,23 @@ int main() {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     ImPlot::CreateContext();
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight();
 
-     // Setup scaling
+    // Setup scaling
     ImGuiStyle& style = ImGui::GetStyle();
-    //style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    //style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
+    // style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style
+    // scaling, changing this requires resetting Style + calling this again) style.FontScaleDpi = main_scale;        //
+    // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for
+    // documentation purpose)
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -366,9 +371,9 @@ int main() {
 #endif
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    //glfwSetMouseButtonCallback(window, mousecallback);
+    // glfwSetMouseButtonCallback(window, mousecallback);
 
-    //particles.push_back(Particle{ 10, 710, 0, 0 });
+    // particles.push_back(Particle{ 10, 710, 0, 0 });
     particleCreation();
 
     // main loop
@@ -384,10 +389,10 @@ int main() {
 
         // change particle color based on speed
         changeColor();
-        
+
         // draw
         drawParticle();
-        
+
         // poll for and process events
         glfwPollEvents();
 
@@ -398,7 +403,7 @@ int main() {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // buffer swap

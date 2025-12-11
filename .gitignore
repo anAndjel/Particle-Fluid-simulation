@@ -3,3 +3,5 @@ x64
 fluidsim/fluidsim.vcxproj.user
 imgui.ini
 build
+
+.cache
