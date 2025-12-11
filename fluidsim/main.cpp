@@ -52,6 +52,8 @@ double ParticlemX, ParticlemY;
 
 float mouseFRadius = 200.0;
 
+bool resetSimButton;
+
 class Particle {
 public:
     float x, y;
@@ -113,6 +115,10 @@ void updateParticle(float dt) {
                 p.b = 0.31;
             }
         }
+    }
+
+    if (resetSimButton) {
+        reset();
     }
 }
 
@@ -251,13 +257,24 @@ void ImguiWindow() {
     }
 
 
-    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-        counter++;
+    ImGui::Button("resetSimButton");                            // Buttons return true when clicked (most widgets return true when edited/activated)
     ImGui::SameLine();
     ImGui::Text("counter = %d", counter);
 
     //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
+}
+
+void reset() {
+    startingX = 5.0;
+    startingY = 710.0;
+    startingVX = 0.0;
+    startingVY = 0.0;
+    startingColorR = 0.31;
+    startingColorG = 0.62;
+    startingColorB = 0.62;
+
+    for ()
 }
 
 int main() {
