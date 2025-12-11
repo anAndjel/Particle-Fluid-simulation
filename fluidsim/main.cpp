@@ -311,7 +311,6 @@ int main() {
         // change particle color based on speed
         changeColor();
         
-
         // draw
         drawParticle();
 
