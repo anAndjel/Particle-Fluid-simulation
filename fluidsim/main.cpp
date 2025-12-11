@@ -1,7 +1,11 @@
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#endif
+
 #include "imgui.h"
 #include "implot.h"
 #include <GLFW/glfw3.h>
-#include <Windows.h>
+
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include <stdio.h>
