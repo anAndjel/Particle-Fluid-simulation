@@ -2,4 +2,8 @@ x64
 .vs
 fluidsim/fluidsim.vcxproj.user
 imgui.ini
+<<<<<<< HEAD
 README_BUILD.md
+=======
+build
+>>>>>>> 7b4a739f27deb4e45c57d74f4411e67267e724b7
