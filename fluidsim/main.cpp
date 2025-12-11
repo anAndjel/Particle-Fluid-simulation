@@ -42,7 +42,7 @@ float currentTime;
 
 float gravity = 0.0;
 float separationForce = 2000.0;
-float radius = 3.0f;
+float radius = 2.6f;
 
 float startingX = 5.0, startingY = 710.0;
 float startingVX = 0.0, startingVY = 0.0;
@@ -89,7 +89,7 @@ static void glfw_error_callback(int error, const char* description)
 void drawParticle() {
     glClearColor(0.08f, 0.08f, 0.08f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glPointSize(3.0f);
+    glPointSize(2.0f);
     glBegin(GL_POINTS);
     for (auto& p : particles) {
         float nx = p.x / WIDTH * 2 - 1;
@@ -238,19 +238,22 @@ void ImguiWindow(ImGuiIO& io = ImGui::GetIO()) {
         ImPlot::ShowDemoWindow();
     }
 
-    ImGui::Begin("Particle Simulator");                          // Create a window called "Hello, world!" and append into it.
+    ImGui::Begin("Particle Simulator", NULL, ImGuiWindowFlags_NoBackground);                          // Create a window called "Hello, world!" and append into it.
+
+    // window settings and style
+    ImGuiStyle& style = ImGui::GetStyle();
+    
+    style.WindowRounding = 5.0f;
+    style.FrameRounding = 5.0f;
 
     // Edit bools storing our window open/close state
     //ImGui::Checkbox("Another Window", &show_another_window);
-
-    ImGui::SliderInt("Ammount of particles", &particle_ammount, 0, 5000);
     ImGui::Spacing();
+    ImGui::SliderInt("Ammount of particles", &particle_ammount, 0, 5000);
     ImGui::Spacing();
     ImGui::SliderFloat("Gravity", &gravity, 0.0f, 5000.0f);
     ImGui::Spacing();
-    ImGui::Spacing();
     ImGui::SliderFloat("Separation Force", &separationForce, 0.0, 5000.0f);
-    ImGui::Spacing();
     ImGui::Spacing();
     ImGui::SliderFloat("Starting Velocity X", &startingVX, -1000.0, 1000.0f);
     ImGui::Spacing();
@@ -258,6 +261,7 @@ void ImguiWindow(ImGuiIO& io = ImGui::GetIO()) {
     ImGui::Spacing();
     ImGui::Spacing();
     ImGui::ColorEdit3("clear color", col1); // Edit 3 floats representing a color
+    ImGui::Spacing();
     ImGui::Spacing();
     //ImGui::SliderFloat("Starting Velocity Y", &separationForce, 0.0, 5000.0f);
     /*
@@ -288,13 +292,18 @@ void ImguiWindow(ImGuiIO& io = ImGui::GetIO()) {
     
 
     if (ImGui::Button("reset")) { resetSimButton = true; };
+    ImGui::Spacing();
+    ImGui::Spacing();
     ImGui::Checkbox("imgui demo window", &show_demo_window);
+    ImGui::Spacing();
     ImGui::Checkbox("implot demo window", &show_implot_demo_window);
-
+    ImGui::Spacing();
+    ImGui::Spacing();
     ImGui::TextLinkOpenURL("Github repo", "https://github.com/anAndjel/Particle-Fluid-simulation");
     ImGui::Spacing();
     ImGui::TextLinkOpenURL("Buy me a coffee!", "https://buymeacoffee.com/alexmtavares?new=1");
-    
+    ImGui::Spacing();
+    ImGui::Spacing();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 }
