@@ -263,7 +263,9 @@ void ImguiWindow() {
     }
 
 
-    ImGui::Button("resetSimButton");                            // Buttons return true when clicked (most widgets return true when edited/activated)
+    if (ImGui::Button("reset")) {
+        resetSimButton = true;
+    }
     ImGui::SameLine();
     ImGui::Text("counter = %d", counter);
 
@@ -272,6 +274,10 @@ void ImguiWindow() {
 }
 
 void reset() {
+    std::cout << "reset" << '\n';
+    lastTime = glfwGetTime();
+    dt = 0;
+    currentTime = 0;
     startingX = 5.0;
     startingY = 710.0;
     startingVX = 0.0;
@@ -286,6 +292,7 @@ void reset() {
 
 
     particleCreation();
+    resetSimButton = false;
 }
 
 int main() {
