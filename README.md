@@ -7,6 +7,7 @@
 ```
 
 
+todo: make it a grid system. why? way better performance.
 
 
 
