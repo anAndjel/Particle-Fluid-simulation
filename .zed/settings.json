@@ -1,0 +1,10 @@
+{
+  "languages": {
+    "C": {
+      "format_on_save": "off"
+    },
+    "C++": {
+      "format_on_save": "off"
+    }
+  }
+}

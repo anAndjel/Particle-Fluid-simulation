@@ -5,3 +5,4 @@ imgui.ini
 build
 
 .cache
+.DS_Store
