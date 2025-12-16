@@ -257,11 +257,14 @@ void SpatialGrid() {
 
     if (cellX < 0) {
       cellX = 0;
-    } else if (cellX >= cellsX) {
+    }
+    if (cellX >= cellsX) {
       cellX = cellsX - 1;
-    } else if (cellY < 0) {
+    }
+    if (cellY < 0) {
       cellY = 0;
-    } else if (cellY >= cellsY) {
+    }
+    if (cellY >= cellsY) {
       cellY = cellsY - 1;
     }
 
