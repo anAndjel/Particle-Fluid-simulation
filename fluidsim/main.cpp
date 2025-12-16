@@ -6,7 +6,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "imgui.h"
 #include "implot.h"
-#include <glad/glad.h>
+#include <glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <deque>
@@ -241,7 +241,7 @@ void updateParticle(float dt) {
 void CollisionHandler(float dt) {
     for (int i = 0; i < particles.size(); i++) {
         auto& a = particles[i];
-        for (int j = 0; j < i; j++) { // O(5000 * 5000)
+        for (int j = 0; j < i; j++) { // O(5000 * 5000) ordo(n^2)
             auto& b = particles[j];
             float dx = a.x - b.x;
             float dy = a.y - b.y;
@@ -477,7 +477,7 @@ int main() {
     glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        MessageBoxA(nullptr, "GLAD failed", "Error", MB_OK);
+        std::cout << "ewwoww" << '\n';
         return -1;
     }
 
