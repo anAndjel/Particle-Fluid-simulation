@@ -1,0 +1,9 @@
+{
+  "name": "particle-fluid-simulation",
+  "version": "0.1.0",
+  "description": "A particle-based fluid simulation library",
+  "dependencies": [
+    "glad"
+  ],
+  "builtin-baseline": "4db164a3fa24910f1a13f21348e2510eb1f78605"
+}

@@ -2,17 +2,18 @@
 #include <Windows.h>
 #endif
 
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
-#include "imgui.h"
-#include "implot.h"
 #include <glad.h>
+
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <deque>
 #include <iostream>
 #include <stdio.h>
 #include <vector>
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "implot.h"
 
 #define GL_SILENCE_DEPRECATION
 using namespace std;
@@ -25,8 +26,8 @@ using namespace std;
 #define TRACING_COLOR_RENDER 0x227733
 #define NUM_ELEM(array) (sizeof(array) / sizeof((array)[0]))
 static uint32_t rrggbb_to_aabbggrr(uint32_t u24_tracing_color) {
-    return 0xff << 24 | (u24_tracing_color & 0xff0000) >> 16 |
-        (u24_tracing_color & 0xff00) | (u24_tracing_color & 0xff) << 16;
+    return 0xff << 24 | (u24_tracing_color & 0xff0000) >> 16 | (u24_tracing_color & 0xff00) |
+        (u24_tracing_color & 0xff) << 16;
 }
 
 GLFWwindow* window;
@@ -72,7 +73,7 @@ int particle_ammount;
 
 int maxFPSbufSamples = 300;
 
-static float col1[3] = { 1.0f, 0.0f, 0.2f };
+static float col1[3] = {1.0f, 0.0f, 0.2f};
 
 // OpenGL variables
 GLuint particleVAO;
@@ -81,7 +82,7 @@ GLuint particleShaderProgram;
 
 class Particle {
 public:
-    float x, y;   // 8bytes
+    float x, y; // 8bytes
     float vx, vy; // 8bytes
     float nx, ny; // 8bytes
     // 32bytes
@@ -89,7 +90,7 @@ public:
 class ParticleColor {
 public:
     float r, g, b; // 12bytes
-    float a;       // ignored for now (padding)
+    float a; // ignored for now (padding)
 };
 
 std::vector<Particle> particles;
@@ -189,10 +190,7 @@ void drawParticle() {
     glBindVertexArray(particleVAO);
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
 
-    glBufferData(GL_ARRAY_BUFFER,
-        particlePositions.size() * sizeof(float),
-        particlePositions.data(),
-        GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, particlePositions.size() * sizeof(float), particlePositions.data(), GL_DYNAMIC_DRAW);
 
     glDrawArrays(GL_POINTS, 0, particles.size());
 
@@ -245,8 +243,7 @@ void CollisionHandler(float dt) {
             auto& b = particles[j];
             float dx = a.x - b.x;
             float dy = a.y - b.y;
-            auto distance = sqrt(
-                ((dx) * (dx)) + ((dy) * (dy))); // at 60fps 750M distance checks / sec
+            auto distance = sqrt(((dx) * (dx)) + ((dy) * (dy))); // at 60fps 750M distance checks / sec
 
             if (distance < radius * 2) {
                 // a.vx -= separationForce * dt;
@@ -294,15 +291,13 @@ void CollisionHandler(float dt) {
 void particleCreation() {
     // TODO: look into .emplace_back
     for (int n = 0; n < particle_ammount; n++) {
-        particleColors.push_back(
-            ParticleColor{ startingColorR, startingColorG, startingColorB, 1.0 });
-        particles.push_back(Particle{ startingX, startingY, VX, VY });
+        particleColors.push_back(ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
+        particles.push_back(Particle{startingX, startingY, VX, VY});
         // startingX += 5;
         startingX++;
         VX++;
         VY++;
     }
-
 }
 
 /* TODO: fix colors */
@@ -343,10 +338,10 @@ void ImguiWindow(ImGuiIO& io = ImGui::GetIO()) {
     }
 
     ImGui::Begin("Particle Simulator", NULL,
-        ImGuiWindowFlags_NoBackground); // Create a window called "Hello,
+                 ImGuiWindowFlags_NoBackground); // Create a window called "Hello,
     // world!" and append into it.
 
-// window settings and style
+    // window settings and style
     ImGuiStyle& style = ImGui::GetStyle();
 
     style.WindowRounding = 5.0f;
@@ -411,8 +406,7 @@ void ImguiWindow(ImGuiIO& io = ImGui::GetIO()) {
     ImGui::Checkbox("implot demo window", &show_implot_demo_window);
     ImGui::Spacing();
     ImGui::Spacing();
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-        1000.0f / io.Framerate, io.Framerate);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
 }
 /*
@@ -490,26 +484,26 @@ int main() {
 
     // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
-  // GL ES 2.0 + GLSL 100 (WebGL 1.0)
+    // GL ES 2.0 + GLSL 100 (WebGL 1.0)
     const char* glsl_version = "#version 100";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(IMGUI_IMPL_OPENGL_ES3)
-  // GL ES 3.0 + GLSL 300 es (WebGL 2.0)
+    // GL ES 3.0 + GLSL 300 es (WebGL 2.0)
     const char* glsl_version = "#version 300 es";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__APPLE__)
-  // GL 3.2 + GLSL 150
+    // GL 3.2 + GLSL 150
     const char* glsl_version = "#version 150";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required on Mac
 #else
-  // GL 3.0 + GLSL 130
+    // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -517,17 +511,14 @@ int main() {
     // only glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
 #endif
 
-    float main_scale =
-        1.0; // ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
+    float main_scale = 1.0; // ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
-    io.ConfigFlags |=
-        ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |=
-        ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     ImPlot::CreateContext();
 

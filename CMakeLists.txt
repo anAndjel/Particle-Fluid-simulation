@@ -19,6 +19,7 @@ include_directories(fluidsim/extern/glad)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
 
+
 add_executable(particle_sim
     fluidsim/main.cpp
 
@@ -35,6 +36,8 @@ add_executable(particle_sim
     fluidsim/extern/implot/implot_items.cpp
 
     fluidsim/extern/glad/glad.c
+
+
 )
 
 # Apply compile options to the target (instead of global flags)
@@ -45,7 +48,7 @@ target_compile_options(particle_sim PRIVATE -O0 -g -ggdb3 -DDEBUG -Wall -Wextra 
 target_compile_definitions(particle_sim PRIVATE GL_SILENCE_DEPRECATION)
 
 if(APPLE)
-  target_link_libraries(particle_sim PkgConfig::GLFW "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
+    target_link_libraries(particle_sim PkgConfig::GLFW "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
 else()
-  target_link_libraries(particle_sim PkgConfig::GLFW GL)
+    target_link_libraries(particle_sim PkgConfig::GLFW GL)
 endif()
