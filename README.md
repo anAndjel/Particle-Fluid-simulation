@@ -3,7 +3,7 @@
 A simple particle simulator which implements a Neighbor Searching algorithm
 using a Grid system
 
-# Demo
+## Demo
 
 ![demo](assets/output.gif)
 
