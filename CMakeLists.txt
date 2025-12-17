@@ -30,6 +30,7 @@ add_executable(particle_sim
     fluidsim/extern/imgui/imgui_widgets.cpp
     fluidsim/extern/imgui/backends/imgui_impl_opengl3.cpp
     fluidsim/extern/imgui/backends/imgui_impl_glfw.cpp
+    fluidsim/imguidz.cpp
 
     fluidsim/extern/implot/implot.cpp
     fluidsim/extern/implot/implot_demo.cpp
@@ -48,7 +49,7 @@ target_compile_options(particle_sim PRIVATE -O0 -g -ggdb3 -DDEBUG -Wall -Wextra 
 target_compile_definitions(particle_sim PRIVATE GL_SILENCE_DEPRECATION)
 
 if(APPLE)
-    target_link_libraries(particle_sim PkgConfig::GLFW "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
+  target_link_libraries(particle_sim PkgConfig::GLFW "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
 else()
-    target_link_libraries(particle_sim PkgConfig::GLFW GL)
+  target_link_libraries(particle_sim PkgConfig::GLFW GL)
 endif()

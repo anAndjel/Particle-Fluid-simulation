@@ -7,6 +7,8 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "imgui.h"
+
+#include "imguidz.h"
 #include "implot.h"
 #include <GLFW/glfw3.h>
 #include <cmath>
@@ -40,7 +42,7 @@ float currentTime;
 
 float gravity = 0.0;
 float separationForce = 2000.0;
-constexpr float radius = 2.7f;
+constexpr float radius = 2.0f;
 
 float startingX = 5.0, startingY = 710.0;
 float startingVX = 0.0, startingVY = 0.0;
@@ -49,13 +51,17 @@ float startingColorR = 0.31;
 float startingColorG = 0.62;
 float startingColorB = 0.62;
 
-float dampeningFactor;
+float AirResistance;
 
 // GLFWmousebuttonfun old_callback = nullptr;
 // GLFWmousebuttonfun new_callback = nullptr;
 
 bool mb1pressed;
 bool mb2pressed;
+
+ImFont *TitleFont;
+ImFont *mainFont;
+ImFont *SubtitleFont;
 
 // bool getmouse = false;
 
@@ -109,7 +115,7 @@ void setupDrawing() {
         layout (location = 0) in vec2 aPos;
         void main() {
             gl_Position = vec4(aPos, 0.0, 1.0);
-            gl_PointSize = 6.0;
+            gl_PointSize = 3.0;
         }
     )";
 
@@ -131,7 +137,8 @@ void setupDrawing() {
   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    std::cout << "Vertex shader compilation failed:\n" << infoLog << std::endl;
+    std::cout << "I'm sowwy mister there was an ewwow :3\n"
+              << infoLog << std::endl;
   }
 
   GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -141,7 +148,7 @@ void setupDrawing() {
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    std::cout << "Fragment shader compilation failed:\n"
+    std::cout << "I'm sowwy mister there was an ewwow :3\n"
               << infoLog << std::endl;
   }
 
@@ -153,7 +160,8 @@ void setupDrawing() {
   glGetProgramiv(particleShaderProgram, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(particleShaderProgram, 512, NULL, infoLog);
-    std::cout << "Shader program linking failed:\n" << infoLog << std::endl;
+    std::cout << "I'm sowwy mister there was an ewwow :3\n"
+              << infoLog << std::endl;
   }
 
   glDeleteShader(vertexShader);
@@ -303,13 +311,13 @@ void CollisionHandler(float dt) {
             // b.vy += separationForce * dt;
 
             a.vx += dx * separationForce * dt;
-            a.vx *= dampeningFactor;
+            a.vx *= AirResistance;
             a.vy += dy * separationForce * dt;
-            a.vy *= dampeningFactor;
+            a.vy *= AirResistance;
             b.vx -= dx * separationForce * dt;
-            b.vx *= dampeningFactor;
+            b.vx *= AirResistance;
             b.vy -= dy * separationForce * dt;
-            b.vy *= dampeningFactor;
+            b.vy *= AirResistance;
             // *= -dampeningFactor
           }
         }
@@ -318,23 +326,23 @@ void CollisionHandler(float dt) {
     // bounce code here
     if (a.y < 3) {
       a.y = 3;
-      a.vy *= -0.5;
-    } else if (a.y > 1080) {
+      a.vy *= -0.6;
+    }
+    if (a.y > 1080) {
       a.y = 1080;
-      a.vy *= -0.5;
+      a.vy *= -0.6;
     }
 
-    // colliosions with walls
     if (a.x > WIDTH) {
       a.x = WIDTH;
       a.vx *= -0.6;
-    } else if (a.x < 0) {
+    }
+    if (a.x < 0) {
       a.x = 0;
       a.vx *= -0.6;
     }
-
     if (a.y <= 3 && a.vy <= 0) {
-      a.vx *= dampeningFactor;
+      a.vx *= -0.6;
     }
   }
 }
@@ -387,36 +395,40 @@ void ImguiWindow(ImGuiIO &io = ImGui::GetIO()) {
     ImPlot::ShowDemoWindow();
   }
 
-  ImGui::Begin("Particle Simulator", NULL,
-               ImGuiWindowFlags_NoBackground); // Create a window called "Hello,
-  // world!" and append into it.
-
-  // window settings and style
+  ImGui::SetNextWindowSize(ImVec2(420, 550), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImVec2(1490, 520), ImGuiCond_Always);
+  ImGui::Begin("##particlesim", NULL,
+               ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar |
+                   ImGuiWindowFlags_NoResize); // Create a window called
   ImGuiStyle &style = ImGui::GetStyle();
 
-  style.WindowRounding = 5.0f;
-  style.FrameRounding = 5.0f;
-
-  // Edit bools storing our window open/close state
-  // ImGui::Checkbox("Another Window", &show_another_window);
-  ImGui::Spacing();
-  ImGui::SliderInt("Ammount of particles", &particle_ammount, 0, 10000);
-  ImGui::Spacing();
+  SetupImGuiStyle();
+  ImGui::PushFont(TitleFont);
+  ImGui::Text("Particle Simulator");
+  ImGui::PopFont();
+  ImGui::PushFont(SubtitleFont);
+  ImGui::SeparatorText("Simulation");
+  ImGui::PopFont();
+  ImGui::PushFont(mainFont);
+  ImGui::SliderInt("Particle Ammount", &particle_ammount, 0, 50000, "%d",
+                   ImGuiSliderFlags_Logarithmic);
+  // ImGui::SliderInt("Ammount of particles", &particle_ammount, 0, 10000);
   ImGui::SliderFloat("Gravity", &gravity, 0.0f, 5000.0f);
-  ImGui::Spacing();
   ImGui::SliderFloat("Separation Force", &separationForce, 0.0, 5000.0f);
-  ImGui::Spacing();
-  ImGui::SliderFloat("Dampening Factor", &dampeningFactor, 0.0, 1.0f);
-  ImGui::Spacing();
+  ImGui::PopFont();
+  ImGui::PushFont(SubtitleFont);
+  ImGui::SeparatorText("Forces");
+  ImGui::PopFont();
+  ImGui::PushFont(mainFont);
+  ImGui::SliderFloat("Air Resistance", &AirResistance, 0.0, 1.0f);
   ImGui::SliderFloat("Starting Velocity X", &startingVX, -5000.0, 5000.0f);
-  ImGui::Spacing();
   ImGui::SliderFloat("Starting Velocity Y", &startingVY, -5000.0, 5000.0f);
-  ImGui::Spacing();
-  ImGui::Spacing();
-  ImGui::ColorEdit3("clear color", col1); // Edit 3 floats representing a color
-  ImGui::Spacing();
-  ImGui::Spacing();
-  // ImGui::SliderFloat("Starting Velocity Y", &separationForce, 0.0, 5000.0f);
+  ImGui::PopFont();
+  ImGui::PushFont(SubtitleFont);
+  ImGui::SeparatorText("Render");
+  ImGui::PopFont();
+  ImGui::PushFont(mainFont);
+  ImGui::ColorEdit3("Particle Color", col1); // Edit 3 floats representing a
   /*
   if (ImGui::Begin("fps")) {
       auto size = ImVec2(ImGui::GetWindowSize().x - 20, 200 * 1.0);
@@ -449,16 +461,12 @@ void ImguiWindow(ImGuiIO &io = ImGui::GetIO()) {
   if (ImGui::Button("reset")) {
     resetSimButton = true;
   };
-  ImGui::Spacing();
-  ImGui::Spacing();
   ImGui::Checkbox("imgui demo window", &show_demo_window);
-  ImGui::Spacing();
+  ImGui::SameLine();
   ImGui::Checkbox("implot demo window", &show_implot_demo_window);
-  ImGui::Spacing();
-  ImGui::Spacing();
-  ImGui::Spacing();
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / io.Framerate, io.Framerate);
+  ImGui::PopFont();
   ImGui::End();
 }
 /*
@@ -557,7 +565,9 @@ int main() {
   glfwMakeContextCurrent(window);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cout << "ewwoww" << '\n';
+    std::cout << "I'm sowwy mister there was an ewwow and idk why dont fwoget "
+                 "to buy me a coffi tho :3"
+              << '\n';
     return -1;
   }
 
@@ -611,10 +621,17 @@ int main() {
 
   ImPlot::CreateContext();
 
+  // clang-format off
+  io.Fonts->AddFontDefault();
+  mainFont = io.Fonts->AddFontFromFileTTF("../assets/Pixel_Letters.ttf", 15.0f);
+  TitleFont = io.Fonts->AddFontFromFileTTF("../assets/Pixel_Letters.ttf", 25.0f);
+  SubtitleFont = io.Fonts->AddFontFromFileTTF("../assets/Pixel_Letters.ttf", 20.0f);
+  IM_ASSERT(mainFont != NULL);
+  // clang-format on
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
 
+  // ImGui::StyleColorsLight();
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
 #ifdef __EMSCRIPTEN__
@@ -625,7 +642,7 @@ int main() {
   IMGUIcallback = glfwSetMouseButtonCallback(window, NULL);
   glfwSetMouseButtonCallback(window, mousecallback);
   */
-
+  ImGui_ImplOpenGL3_CreateFontsTexture();
   // Initial particle creation
   particleCreation();
 
@@ -643,14 +660,13 @@ int main() {
     CollisionHandler(dt);
 
     // change particle color based on speed
-    // changeColor();
+    changeColor();
 
     // draw
     drawParticle();
 
     // imgui window
     ImguiWindow();
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
