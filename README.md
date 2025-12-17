@@ -1,7 +1,7 @@
 # Particle Simulation
 
 A simple particle simulator which implements a Neighbor Searching algorithm
-using a Grid system
+using a Grid system and Spatial Hashing
 
 
 
