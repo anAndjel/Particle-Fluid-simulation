@@ -190,7 +190,7 @@ void drawParticle() {
   glUseProgram(particleShaderProgram);
 
   GLint colorLoc = glGetUniformLocation(particleShaderProgram, "particleColor");
-  glUniform3f(colorLoc, startingColorR, startingColorG, startingColorB);
+  glUniform3f(colorLoc, col1[0], col1[1], col1[2]);
 
   std::vector<float> particlePositions;
   particlePositions.reserve(particles.size() * 2);
@@ -371,14 +371,16 @@ void changeColor() {
       pc.r = col1[0];
       pc.g = col1[1];
       pc.b = col1[2];
-    } else if (p.vx > 300.0 && p.vy > 300.0) {
+    }
+    if (p.vx > 300.0 && p.vy > 300.0) {
       pc.r = col1[0];
       pc.g = col1[1];
       pc.b = col1[2];
-    } else if (p.vx < 100.0 || p.vy < 100.0) {
-      pc.r = startingColorR;
-      pc.g = startingColorG;
-      pc.b = startingColorB;
+    }
+    if (p.vx < 300.0 || p.vy < 300.0) {
+      col1[0] = startingColorR;
+      col1[1] = startingColorG;
+      col1[2] = startingColorB;
     }
   }
 }

@@ -21,7 +21,6 @@ using a Grid system and Spatial Hashing
 - [x] ~~Menu Revamp~~
 - [ ] Changing colors depending on particle speed
 - [ ] Fix the dampening factor
-- [ ] Make the menu look better
 - [ ] Mouse click particle creation feature
 
 
