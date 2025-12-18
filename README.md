@@ -18,6 +18,7 @@ using a Grid system and Spatial Hashing
 
 ## TODO:
 - [x] ~~Implement Neighbor Searching with Spatial Hashing~~
+- [x] ~~Menu Revamp~~
 - [ ] Changing colors depending on particle speed
 - [ ] Fix the dampening factor
 - [ ] Make the menu look better
