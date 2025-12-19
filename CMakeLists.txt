@@ -36,20 +36,24 @@ add_executable(particle_sim
     fluidsim/extern/implot/implot_demo.cpp
     fluidsim/extern/implot/implot_items.cpp
 
-    fluidsim/extern/glad/glad.c
-
-
 )
 
 # Apply compile options to the target (instead of global flags)
 target_compile_features(particle_sim PRIVATE cxx_std_20)
 target_compile_options(particle_sim PRIVATE -O0 -g -ggdb3 -DDEBUG -Wall -Wextra -Wshadow -Wpedantic -Wno-variadic-macros -Werror=return-type)
 
+# Compile glad as separate library to silence 100's of pedantic C++ warnings
+add_library(glad
+    fluidsim/extern/glad/glad.c
+)
+
 # Using imported target from pkg-config; no manual include/link directories needed
 target_compile_definitions(particle_sim PRIVATE GL_SILENCE_DEPRECATION)
 
 if(APPLE)
-  target_link_libraries(particle_sim PkgConfig::GLFW "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
+  target_link_libraries(particle_sim "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
 else()
-  target_link_libraries(particle_sim PkgConfig::GLFW GL)
+  target_link_libraries(particle_sim GL)
 endif()
+
+target_link_libraries(particle_sim PkgConfig::GLFW glad)
