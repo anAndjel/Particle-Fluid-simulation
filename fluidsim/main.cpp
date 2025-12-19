@@ -41,8 +41,11 @@ float dt;
 float currentTime;
 
 float gravity = 0.0;
+constexpr float GravitationalConstant = 0.1f;
 float separationForce = 2000.0;
-constexpr float radius = 2.0f;
+constexpr float radius = 3.0f;
+constexpr float ParticleMass = 1000.0f;
+constexpr float ParticleMass2 = 1000000.0f;
 
 float startingX = 5.0, startingY = 710.0;
 float startingVX = 0.0, startingVY = 0.0;
@@ -75,6 +78,8 @@ bool resetSimButton;
 bool show_demo_window = false;
 bool show_implot_demo_window = false;
 
+float particleSize = 3.0f;
+
 int particle_ammount;
 
 static float col1[3] = {1.0f, 0.0f, 0.2f};
@@ -82,6 +87,8 @@ static float col1[3] = {1.0f, 0.0f, 0.2f};
 constexpr float cellSize = radius * radius;
 constexpr int cellsX = (WIDTH / cellSize);
 constexpr int cellsY = (HEIGHT / cellSize);
+
+bool SpatialGravityEnabled = false;
 
 // OpenGL variables
 GLuint particleVAO;
@@ -92,8 +99,9 @@ class Particle {
 public:
   float x, y;   // 8bytes
   float vx, vy; // 8bytes
+  float mass;
   float nx, ny; // 8bytes
-                // 32bytes
+  // 32bytes
 };
 class ParticleColor {
 public:
@@ -105,6 +113,9 @@ std::vector<Particle> particles;
 std::vector<ParticleColor> particleColors;
 std::vector<int> grid[cellsX][cellsY];
 
+void applyGravity(Particle &a, Particle &b, float GravitationalConstant,
+                  float dt);
+
 static void glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
@@ -113,9 +124,10 @@ void setupDrawing() {
   const char *vertexShaderSource = R"(
         #version 330 core
         layout (location = 0) in vec2 aPos;
+        uniform float particleSize;
         void main() {
             gl_Position = vec4(aPos, 0.0, 1.0);
-            gl_PointSize = 3.0;
+            gl_PointSize = particleSize;
         }
     )";
 
@@ -148,8 +160,7 @@ void setupDrawing() {
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    std::cout << "I'm sowwy mister there was an ewwow :3\n"
-              << infoLog << std::endl;
+    std::cout << "EROR!! PANIK!!\n" << infoLog << std::endl;
   }
 
   particleShaderProgram = glCreateProgram();
@@ -189,6 +200,9 @@ void drawParticle() {
 
   glUseProgram(particleShaderProgram);
 
+  int sizeLoc = glGetUniformLocation(particleShaderProgram, "particleSize");
+  glUniform1f(sizeLoc, particleSize);
+
   GLint colorLoc = glGetUniformLocation(particleShaderProgram, "particleColor");
   glUniform3f(colorLoc, col1[0], col1[1], col1[2]);
 
@@ -210,7 +224,17 @@ void drawParticle() {
   glBindVertexArray(0);
 }
 
-void updateParticle(float dt) {
+void updateParticle(float GravitationalConstant, float dt) {
+
+  if (SpatialGravityEnabled == true) {
+    for (int d = 0; d < particles.size(); d++) {
+      auto &a = particles[d];
+      for (int k = 0; k < particles.size(); k++) {
+        auto &b = particles[k];
+        applyGravity(a, b, GravitationalConstant, dt);
+      }
+    }
+  }
 
   glfwGetCursorPos(window, &GLFWmX, &GLFWmY);
 
@@ -247,6 +271,30 @@ void updateParticle(float dt) {
   if (resetSimButton) {
     reset();
   }
+}
+
+void applyGravity(Particle &a, Particle &b, float GravitationalConstant,
+                  float dt) {
+  // std::cout << "UHAEOUIHSF" << std::endl;
+  float dx = a.x - b.x;
+  float dy = a.y - b.y;
+
+  float distSq = dx * dx + dy * dy + 0.01f; // 0.01f for a little softening
+  float dist = std::sqrt(distSq);
+
+  // normalize direction
+  float nx = dx / dist;
+  float ny = dy / dist;
+
+  // accelertion
+  float accelA = GravitationalConstant * b.mass / distSq;
+  float accelB = GravitationalConstant * a.mass / distSq;
+
+  a.vx += nx * accelA * dt;
+  a.vy += ny * accelA * dt;
+
+  b.vx += nx * accelB * dt;
+  b.vy += ny * accelB * dt;
 }
 
 void clearGrid() {
@@ -346,17 +394,28 @@ void CollisionHandler(float dt) {
     }
   }
 }
-
+void SpatialGRAVparticleCreation() {
+  for (int n = 0; n < 1; n++) {
+    particleColors.push_back(
+        ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
+    particles.push_back(Particle{startingX, startingY, VX, VY, ParticleMass});
+    // startingX += 5;
+  }
+  for (int u = 0; u < 1; u++) {
+    particleColors.push_back(
+        ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
+    particles.push_back(
+        Particle{startingX + 500, startingY, -VX, -VY, ParticleMass2});
+    // startingX += 5;
+  }
+}
 void particleCreation() {
-  // TODO: look into .emplace_back
   for (int n = 0; n < particle_ammount; n++) {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
-    particles.push_back(Particle{startingX, startingY, VX, VY});
+    particles.push_back(Particle{startingX, startingY, VX, VY, ParticleMass});
     // startingX += 5;
     startingX++;
-    VX++;
-    VY++;
   }
 }
 
@@ -416,6 +475,7 @@ void ImguiWindow(ImGuiIO &io = ImGui::GetIO()) {
                    ImGuiSliderFlags_Logarithmic);
   // ImGui::SliderInt("Ammount of particles", &particle_ammount, 0, 10000);
   ImGui::SliderFloat("Gravity", &gravity, 0.0f, 5000.0f);
+  ImGui::SliderFloat("Particle Size", &particleSize, 0.0f, 10.0f);
   ImGui::SliderFloat("Separation Force", &separationForce, 0.0, 5000.0f);
   ImGui::PopFont();
   ImGui::PushFont(SubtitleFont);
@@ -463,6 +523,8 @@ void ImguiWindow(ImGuiIO &io = ImGui::GetIO()) {
   if (ImGui::Button("reset")) {
     resetSimButton = true;
   };
+  ImGui::Checkbox("Spatial Gravity", &SpatialGravityEnabled);
+  ImGui::SameLine();
   ImGui::Checkbox("imgui demo window", &show_demo_window);
   ImGui::SameLine();
   ImGui::Checkbox("implot demo window", &show_implot_demo_window);
@@ -484,7 +546,33 @@ void mousecallback(GLFWwindow* window, int button, int action, int mods) {
 
 }*/
 
+void SpatialGravRESET() {
+  lastTime = glfwGetTime();
+  dt = 0;
+  currentTime = 0;
+  startingX = 5.0;
+  startingY = 710.0;
+  VX = startingVX;
+  VY = startingVY;
+  startingColorR = 0.31;
+  startingColorG = 0.62;
+  startingColorB = 0.62;
+
+  while (!particles.empty()) {
+    particles.pop_back();
+    particleColors.pop_back();
+  }
+
+  SpatialGRAVparticleCreation();
+  resetSimButton = false;
+}
+
 void reset() {
+  if (SpatialGravityEnabled == true) {
+    SpatialGravRESET();
+    return;
+  }
+
   lastTime = glfwGetTime();
   dt = 0;
   currentTime = 0;
@@ -653,9 +741,19 @@ int main() {
     currentTime = glfwGetTime();
     dt = currentTime - lastTime;
     lastTime = currentTime;
+    //
+    // if (SpatialGravityEnabled) {
+    //   for (int i = 0; i < particles.size(); i++) {
+    //     auto &a = particles[i];
+    //     for (int j = 0; j < particles.size(); j++) {
+    //       auto &b = particles[j];
+    //       applyGravity(a, b, G, dt);
+    //     }
+    //   }
+    // }
 
     // physics update
-    updateParticle(dt);
+    updateParticle(GravitationalConstant, dt);
     clearGrid();
     SpatialGrid();
     CollisionHandler(dt);
