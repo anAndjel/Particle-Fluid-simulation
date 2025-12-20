@@ -43,13 +43,13 @@ float timeScale = 1.0f;
 bool paused = false;
 
 float gravity = 0.0;
-constexpr float GravitationalConstant = 0.00000000000000001f;
+constexpr float GravitationalConstant = 0.000000000001f;
 float separationForce = 2000.0;
 constexpr float radius = 2.0f;
-constexpr float ParticleMass = 1e5;
+constexpr float ParticleMass = 0.000001f;
 // constexpr float ParticleMass = 0.000000000001f;
 // constexpr float ParticleMass2 = 90e95;
-constexpr float ParticleMass2 = 1e5;
+constexpr float ParticleMass2 = 9e20;
 
 float startingX = 5.0, startingY = 710.0;
 float startingVX = 0.0, startingVY = 0.0;
@@ -293,7 +293,7 @@ void applyGravity(Particle &a, Particle &b, float GravitationalConstant,
   float nx = dx / dist;
   float ny = dy / dist;
 
-  float force = GravitationalConstant * a.mass * b.mass / distSq;
+  double force = GravitationalConstant * a.mass * b.mass / distSq;
 
   // accelertion
   float ax = force / a.mass;
@@ -410,15 +410,15 @@ void SpatialGRAVparticleCreation() {
   for (int n = 0; n < 1; n++) {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
-    particles.push_back(
-        Particle{startingX + 100, startingY - 100, 0.05, 0.005, ParticleMass});
+    particles.push_back(Particle{startingX + 100, startingY - 100, 0.1, 0.1,
+                                 ParticleMass, 0, 0});
     // startingX += 5;
   }
   for (int u = 0; u < 1; u++) {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
-    particles.push_back(
-        Particle{startingX + 1100, startingY - 100, -0.05, -0.005, ParticleMass2});
+    particles.push_back(Particle{startingX + 1100, startingY - 100, -0.0, -0.0,
+                                 ParticleMass2, 0, 0});
     // startingX += 5;
   }
 }
@@ -426,7 +426,8 @@ void particleCreation() {
   for (int n = 0; n < particle_ammount; n++) {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
-    particles.push_back(Particle{startingX,startingY, VX,VY, ParticleMass, 0, 0});
+    particles.push_back(
+        Particle{startingX, startingY, VX, VY, ParticleMass, 0, 0});
     // startingX += 5;
     startingX++;
     startingY++;
@@ -488,7 +489,7 @@ void ImguiWindow(ImGuiIO &io = ImGui::GetIO()) {
                    ImGuiSliderFlags_Logarithmic);
   // ImGui::SliderInt("Ammount of particles", &particle_ammount, 0, 10000);
   ImGui::SliderFloat("Gravity", &gravity, 0.0f, 5000.0f);
-  ImGui::SliderFloat("Simulation Speed", &timeScale, 0.25, 1000.0f);
+  ImGui::SliderFloat("Simulation Speed", &timeScale, 0.25, 10000.0f);
   ImGui::SliderFloat("Particle Size", &particleSize, 0.0f, 10.0f);
   ImGui::SliderFloat("Separation Force", &separationForce, 0.0, 5000.0f);
   ImGui::PopFont();
@@ -545,7 +546,6 @@ void mousecallback(GLFWwindow* window, int button, int action, int mods) {
 
 void SpatialGravRESET() {
   lastTime = glfwGetTime();
-  dt = 0;
   currentTime = 0;
   startingX = 5.0;
   startingY = 710.0;
