@@ -32,9 +32,15 @@ static uint32_t rrggbb_to_aabbggrr(uint32_t u24_tracing_color) {
          (u24_tracing_color & 0xff00) | (u24_tracing_color & 0xff) << 16;
 }
 
-constexpr float test = -100.0f;
+constexpr float test = 100.0f;
 
-inline ImVec2 worldToNDC(float x, float y) { return ImVec2(x, HEIGHT - y); }
+inline ImVec2 worldToNDC(float x, float y) {
+  return ImVec2((x / WIDTH) * 2.0f - 1.0f, (y / HEIGHT) * 2.0f - 1.0f);
+}
+
+inline ImVec2 NDCToScreen(ImVec2 ndc) {
+  return ImVec2((ndc.x + 1.0f) * 0.5f * WIDTH, (1.0f - ndc.y) * 0.5f * HEIGHT);
+}
 
 GLFWwindow *window;
 
@@ -47,11 +53,13 @@ float timeScale = 1.0f;
 bool paused = false;
 
 float gravity = 0.0;
-constexpr float GravitationalConstant = 0.000000000001f;
+constexpr float GravitationalConstant = 0.00000000000000001f;
 float separationForce = 2000.0;
-constexpr float radius = 3.0f;
-constexpr float ParticleMass = 0.000000000001f;
-constexpr float ParticleMass2 = 9e15;
+constexpr float radius = 2.0f;
+constexpr float ParticleMass = 1e5;
+// constexpr float ParticleMass = 0.000000000001f;
+// constexpr float ParticleMass2 = 90e95;
+constexpr float ParticleMass2 = 1e5;
 
 float startingX = 5.0, startingY = 710.0;
 float startingVX = 0.0, startingVY = 0.0;
@@ -411,14 +419,14 @@ void SpatialGRAVparticleCreation() {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
     particles.push_back(
-        Particle{startingX + 100, startingY, 0.1, 0.05, ParticleMass});
+        Particle{startingX + 100, startingY - 100, 0.05, 0.005, ParticleMass});
     // startingX += 5;
   }
   for (int u = 0; u < 1; u++) {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
     particles.push_back(
-        Particle{startingX + 1100, startingY, VX, -VY, ParticleMass2});
+        Particle{startingX + 1100, startingY - 100, -0.05, -0.005, ParticleMass2});
     // startingX += 5;
   }
 }
@@ -488,7 +496,7 @@ void ImguiWindow(ImGuiIO &io = ImGui::GetIO()) {
                    ImGuiSliderFlags_Logarithmic);
   // ImGui::SliderInt("Ammount of particles", &particle_ammount, 0, 10000);
   ImGui::SliderFloat("Gravity", &gravity, 0.0f, 5000.0f);
-  ImGui::SliderFloat("Simulation Speed", &timeScale, 0.25, 100.0f);
+  ImGui::SliderFloat("Simulation Speed", &timeScale, 0.25, 1000.0f);
   ImGui::SliderFloat("Particle Size", &particleSize, 0.0f, 10.0f);
   ImGui::SliderFloat("Separation Force", &separationForce, 0.0, 5000.0f);
   ImGui::PopFont();
@@ -618,41 +626,46 @@ void reset() {
   resetSimButton = false;
 }
 
-void DrawForces() {
+void DrawForces(const std::vector<Particle> &particles) {
   ImDrawList *dl = ImGui::GetBackgroundDrawList();
 
   for (int i = 0; i < particles.size(); i++) {
-    Particle &a = particles[i];
+    const Particle &a = particles[i];
 
     for (int j = i + 1; j < particles.size(); j++) {
-      Particle &b = particles[j];
+      const Particle &b = particles[j];
 
       float dx = b.x - a.x;
       float dy = b.y - a.y;
 
-      float distSq = dx * dx - dy * dy + 0.01f;
-      float dist = std::sqrt(distSq);
+      float distSq = dx * dx + dy * dy + 0.0001f;
+      float dist = std::sqrtf(distSq);
 
       float nx = dx / dist;
       float ny = dy / dist;
 
-      float force = GravitationalConstant * a.mass * b.mass / distSq;
+      float force = (a.mass * b.mass) / distSq;
 
       float fx = nx * force * forceDrawScale;
       float fy = ny * force * forceDrawScale;
 
-      ImVec2 start = worldToNDC(a.x, a.y);
-      // ImVec2 start = worldToNDC(a.x, a.y);
-      // ImVec2 end = ImVec2(a.x + fx, a.y + fy);
-      ImVec2 end = ImVec2(a.x + fx, a.y + fy);
-
-      ImVec2 s0((start.x + 1.0f) * 0.5f * WIDTH,
-                (1.0f - start.y) * 0.5f * HEIGHT);
-      ImVec2 s1((end.x + 1.0f) * 0.5f * WIDTH, (1.0f - end.y) * 0.5f * HEIGHT);
+      ImVec2 start = NDCToScreen(worldToNDC(a.x, a.y));
+      ImVec2 end = NDCToScreen(worldToNDC(a.x + fx, a.y + fy));
 
       dl->AddLine(start, end, IM_COL32(255, 100, 100, 100), 1.0f);
     }
   }
+}
+
+void DrawAxes() {
+  ImDrawList *dl = ImGui::GetBackgroundDrawList();
+
+  ImVec2 origin = NDCToScreen(worldToNDC(0, 0));
+  ImVec2 xAxis = NDCToScreen(worldToNDC(200, 0));
+  ImVec2 yAxis = NDCToScreen(worldToNDC(0, 200));
+
+  dl->AddLine(origin, xAxis, IM_COL32(255, 0, 0, 255), 2.0f); // X
+  dl->AddLine(origin, yAxis, IM_COL32(0, 255, 0, 255), 2.0f); // Y
 }
 
 /*
@@ -834,8 +847,9 @@ int main() {
     // imgui window
     ImguiWindow();
     if (drawForces == true) {
-      DrawForces();
+      DrawForces(particles);
     }
+    DrawAxes();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
