@@ -43,13 +43,13 @@ float timeScale = 1.0f;
 bool paused = false;
 
 float gravity = 0.0;
-constexpr float GravitationalConstant = 0.00000000000000001f;
+constexpr float GravitationalConstant = 0.000000000000000001f;
 float separationForce = 2000.0;
 constexpr float radius = 2.0f;
-constexpr float ParticleMass = 1e5;
-// constexpr float ParticleMass = 0.000000000001f;
-// constexpr float ParticleMass2 = 90e95;
-constexpr float ParticleMass2 = 1e5;
+// constexpr float ParticleMass = 1e5;
+constexpr float ParticleMass = 0.00000000000000001f;
+constexpr float ParticleMass2 = 95e20;
+// constexpr float ParticleMass2 = 1e5;
 
 float startingX = 5.0, startingY = 710.0;
 float startingVX = 0.0, startingVY = 0.0;
@@ -418,7 +418,7 @@ void SpatialGRAVparticleCreation() {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
     particles.push_back(
-        Particle{startingX + 1100, startingY - 100, -0.05, -0.005, ParticleMass2});
+        Particle{startingX + 1100, startingY - 100, -0.0, -0.0, ParticleMass2});
     // startingX += 5;
   }
 }
@@ -426,7 +426,8 @@ void particleCreation() {
   for (int n = 0; n < particle_ammount; n++) {
     particleColors.push_back(
         ParticleColor{startingColorR, startingColorG, startingColorB, 1.0});
-    particles.push_back(Particle{startingX,startingY, VX,VY, ParticleMass, 0, 0});
+    particles.push_back(
+        Particle{startingX, startingY, VX, VY, ParticleMass, 0, 0});
     // startingX += 5;
     startingX++;
     startingY++;
@@ -545,7 +546,6 @@ void mousecallback(GLFWwindow* window, int button, int action, int mods) {
 
 void SpatialGravRESET() {
   lastTime = glfwGetTime();
-  dt = 0;
   currentTime = 0;
   startingX = 5.0;
   startingY = 710.0;
